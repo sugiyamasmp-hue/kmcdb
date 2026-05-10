@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMC 会員管理</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Oswald:wght@400;600&display=swap');
+
+  :root {
+    --navy: #0a1628;
+    --blue: #1a3a5c;
+    --accent: #00a8e8;
+    --gold: #c9a84c;
+    --light: #e8f4fd;
+    --white: #ffffff;
+    --gray: #8899aa;
+    --border: #2a4a6a;
+    --danger: #e05252;
+    --success: #4caf7d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--blue), var(--navy));
+    border-bottom: 2px solid var(--accent);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 4px;
+  }
+
+  .logo span {
+    color: var(--gold);
+  }
+
+  .header-sub {
+    font-size: 12px;
+    color: var(--gray);
+    letter-spacing: 2px;
+  }
+
+  .nav-bar {
+    background: var(--blue);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--light);
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .counter {
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    margin-left: auto;
+  }
+
+  .counter span { color: var(--gray); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; }
+
+  .main {
+    padding: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--blue);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Oswald', sans-serif;
+    color: var(--accent);
+    font-size: 14px;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .full { grid-column: 1 / -1; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--navy);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .field select option { background: var(--navy); }
+
+  .toggle-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle input { display: none; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--white);
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: 0.2s;
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+  .toggle-label { font-size: 13px; color: var(--light); }
+
+  .action-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .btn {
+    padding: 10px 28px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .btn-primary { background: var(--accent); color: var(--white); }
+  .btn-primary:hover { background: #0090cc; }
+  .btn-danger { background: var(--danger); color: var(--white); }
+  .btn-danger:hover { background: #c03030; }
+  .btn-outline { background: none; border: 1px solid var(--border); color: var(--light); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 999;
+  }
+
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--success); color: white; }
+  .toast.error { background: var(--danger); color: white; }
+
+  .loading {
+    text-align: center;
+    padding: 60px;
+    color: var(--gray);
+    font-size: 16px;
+  }
+
+  .id-badge {
+    background: var(--navy);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  /* ===== アクション履歴 ===== */
+  .actions-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  .btn-add-action { background:var(--success); color:white; border:none; padding:6px 16px; border-radius:4px; font-size:13px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:background 0.2s; }
+  .btn-add-action:hover { background:#3a8f60; }
+  .action-form-box { background:var(--navy); border:1px solid var(--accent); border-radius:6px; padding:16px; margin-bottom:16px; }
+  .action-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .action-table th { text-align:left; color:var(--gray); font-size:11px; letter-spacing:1px; padding:6px 8px; border-bottom:1px solid var(--border); }
+  .action-table td { padding:8px; border-bottom:1px solid rgba(42,74,106,0.5); color:var(--light); vertical-align:middle; }
+  .action-table tr:last-child td { border-bottom:none; }
+  .badge-cat { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700; }
+  .cat-send    { background:rgba(0,168,232,0.2); color:#00a8e8; border:1px solid rgba(0,168,232,0.4); }
+  .cat-payment { background:rgba(76,175,125,0.2); color:#4caf7d; border:1px solid rgba(76,175,125,0.4); }
+  .cat-change  { background:rgba(201,168,76,0.2); color:#c9a84c; border:1px solid rgba(201,168,76,0.4); }
+  .btn-del-action { background:none; border:none; color:var(--danger); cursor:pointer; font-size:16px; padding:0 4px; opacity:0.6; transition:opacity 0.2s; }
+  .btn-del-action:hover { opacity:1; }
+  .action-input { width:100%; background:var(--navy); border:1px solid var(--border); color:var(--white); padding:8px 12px; border-radius:4px; font-size:14px; font-family:'Noto Sans JP',sans-serif; transition:border-color 0.2s; }
+  .action-input:focus { outline:none; border-color:var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">KM<span>C</span></div>
+    <div class="header-sub">KANAZAWA HAKKEI MARINE CLUB</div>
+  </div>
+  <div style="margin-left:16px; color:var(--light); font-size:14px;">会員管理システム</div>
+  <button onclick="location.href='kmc_login.html'" style="margin-left:auto;background:rgba(224,82,82,0.15);border:1px solid rgba(224,82,82,0.45);color:#ff9999;padding:8px 20px;border-radius:6px;font-size:13px;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all 0.2s;" onmouseover="this.style.background='rgba(224,82,82,0.35)';this.style.color='#fff'" onmouseout="this.style.background='rgba(224,82,82,0.15)';this.style.color='#ff9999'">✕ 閉じる</button>
+</header>
+
+<div class="nav-bar">
+  <button class="nav-btn" onclick="location.href='kmc_list.html'" style="border-color:var(--accent);color:var(--accent);">📋 一覧へ</button>
+  <button class="nav-btn" onclick="newRecord()">＋ 新規</button>
+  <button class="nav-btn" id="btn-save" onclick="saveRecord()">💾 保存</button>
+  <button class="nav-btn btn-danger" id="btn-delete" onclick="deleteRecord()" style="border-color:#e05252;color:#e05252;">🗑 削除</button>
+  <button class="nav-btn" id="btn-first" onclick="goFirst()">|◀</button>
+  <button class="nav-btn" id="btn-prev" onclick="goPrev()">◀ 前へ</button>
+  <button class="nav-btn" id="btn-next" onclick="goNext()">次へ ▶</button>
+  <button class="nav-btn" id="btn-last" onclick="goLast()">▶|</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+    <input id="search-input" type="text" placeholder="名前で検索..." 
+      style="background:var(--navy);border:1px solid var(--border);color:var(--white);padding:6px 12px;border-radius:4px;font-size:13px;font-family:'Noto Sans JP',sans-serif;width:180px;"
+      oninput="searchRecords(this.value)"
+      onfocus="this.style.borderColor='var(--accent)'"
+      onblur="this.style.borderColor='var(--border)'">
+    <button class="nav-btn" onclick="clearSearch()">✕</button>
+  </div>
+  <div class="counter" id="counter"><span>読込中...</span></div>
+</div>
+
+<!-- 検索結果ドロップダウン -->
+<div id="search-results" style="display:none;position:fixed;z-index:999;background:var(--blue);border:1px solid var(--accent);border-radius:4px;max-height:300px;overflow-y:auto;min-width:250px;"></div>
+
+<div class="main" id="main-content">
+  <div class="loading">データを読み込んでいます...</div>
+</div>
+
+<div id="actions-section" class="main" style="padding-top:0;"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://wxuqqkpgyfkpuejvvzix.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_8NnuA53dbxq_sK-yovy-wA_ZDvu2AHO';
+
+let records = [];
+let currentIndex = 0;
+let isNew = false;
+let currentMemberId = null;
+
+async function api(method, path, body) {
+  const res = await fetch(SUPABASE_URL + path, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadAll() {
+  try {
+    records = await api('GET', '/rest/v1/customers?select=*&order=id.asc');
+    if (records.length > 0) {
+      currentIndex = 0;
+      renderForm();
+    } else {
+      showEmpty();
+    }
+    updateCounter();
+  } catch(e) {
+    showToast('データ読込エラー: ' + e.message, 'error');
+  }
+}
+
+function updateCounter() {
+  const el = document.getElementById('counter');
+  if (isNew) {
+    el.innerHTML = '<span>新規入力中</span>';
+  } else {
+    el.innerHTML = (currentIndex + 1) + ' <span>/ ' + records.length + ' 件</span>';
+  }
+  document.getElementById('btn-prev').disabled = currentIndex <= 0 || isNew;
+  document.getElementById('btn-next').disabled = currentIndex >= records.length - 1 || isNew;
+  document.getElementById('btn-first').disabled = currentIndex <= 0 || isNew;
+  document.getElementById('btn-last').disabled = currentIndex >= records.length - 1 || isNew;
+  document.getElementById('btn-delete').disabled = isNew;
+}
+
+function renderForm(data) {
+  const d = data || (isNew ? {} : records[currentIndex]);
+  currentMemberId = d.id || null;
+  const main = document.getElementById('main-content');
+
+  main.innerHTML = `
+    ${d.id ? '<div class="id-badge">ID: ' + d.id + '</div>' : '<div class="id-badge" style="border-color:var(--accent);color:var(--accent);">新規登録</div>'}
+
+    <div class="card">
+      <div class="card-title">基本情報</div>
+      <div class="form-grid">
+        <div class="field"><label>氏名</label><input id="f_name" value="${d.name||''}" placeholder="例: 山田 太郎"></div>
+        <div class="field"><label>氏名カナ</label><input id="f_name_kana" value="${d.name_kana||''}" placeholder="例: ヤマダ タロウ"></div>
+        <div class="field"><label>性別</label>
+          <select id="f_gender">
+            <option value="" ${!d.gender?'selected':''}>---</option>
+            <option value="M" ${d.gender==='M'?'selected':''}>男性 (M)</option>
+            <option value="Y" ${d.gender==='Y'?'selected':''}>女性 (Y)</option>
+          </select>
+        </div>
+        <div class="field"><label>電話番号</label><input id="f_phone" value="${d.phone||''}" placeholder="090-0000-0000"></div>
+        <div class="field"><label>メールアドレス</label><input id="f_email" value="${d.email||''}" placeholder="example@email.com"></div>
+        <div class="field"><label>LINE ID</label><input id="f_line_id" value="${d.line_id||''}" placeholder="LINE ID"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">住所</div>
+      <div class="form-grid four">
+        <div class="field"><label>郵便番号</label><input id="f_postal_code" value="${d.postal_code||''}" placeholder="000-0000"></div>
+        <div class="field"><label>都道府県</label><input id="f_prefecture" value="${d.prefecture||''}" placeholder="神奈川県"></div>
+        <div class="field full" style="grid-column:span 2"><label>市区町村</label><input id="f_city" value="${d.city||''}" placeholder="横須賀市"></div>
+      </div>
+      <div class="form-grid" style="margin-top:14px;">
+        <div class="field"><label>町名番地</label><input id="f_address" value="${d.address||''}" placeholder="津久井1-14-16"></div>
+        <div class="field"><label>建物名・部屋番号</label><input id="f_building" value="${d.building||''}" placeholder="メゾン津久井浜101"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">会社情報</div>
+      <div class="form-grid">
+        <div class="field"><label>会社名</label><input id="f_company_name" value="${d.company_name||''}" placeholder="会社名"></div>
+        <div class="field"><label>会社電話</label><input id="f_company_phone" value="${d.company_phone||''}" placeholder="03-0000-0000"></div>
+        <div class="field"><label>会社都道府県</label><input id="f_company_prefecture" value="${d.company_prefecture||''}" placeholder="東京都"></div>
+        <div class="field"><label>会社市区町村</label><input id="f_company_city" value="${d.company_city||''}" placeholder="渋谷区"></div>
+        <div class="field full"><label>会社建物名</label><input id="f_company_building" value="${d.company_building||''}" placeholder="〇〇ビル3F"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">その他</div>
+      <div class="form-grid">
+        <div class="field"><label>郵送先</label>
+          <select id="f_mail_destination">
+            <option value="" ${!d.mail_destination?'selected':''}>---</option>
+            <option value="自宅" ${d.mail_destination==='自宅'?'selected':''}>自宅</option>
+            <option value="会社" ${d.mail_destination==='会社'?'selected':''}>会社</option>
+          </select>
+        </div>
+        <div class="field"><label>入会日</label><input id="f_joined_at" type="date" value="${d.joined_at||''}"></div>
+        <div class="field"><label>退会日</label><input id="f_left_at" type="date" value="${d.left_at||''}"></div>
+        <div class="field" style="display:flex;align-items:center;gap:20px;padding-top:20px;">
+          <div class="toggle-field">
+            <label class="toggle"><input type="checkbox" id="f_no_mail" ${d.no_mail?'checked':''}><span class="toggle-slider"></span></label>
+            <span class="toggle-label">郵送不要</span>
+          </div>
+          <div class="toggle-field">
+            <label class="toggle"><input type="checkbox" id="f_in_arrears" ${d.in_arrears?'checked':''}><span class="toggle-slider"></span></label>
+            <span class="toggle-label">滞納中</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-outline" onclick="loadAll()">↺ リセット</button>
+      <button class="btn btn-primary" onclick="saveRecord()">💾 保存する</button>
+    </div>
+  `;
+  updateCounter();
+  if (currentMemberId) loadActions(currentMemberId);
+  else document.getElementById('actions-section').innerHTML = '';
+}
+
+function getFormData() {
+  return {
+    name: document.getElementById('f_name').value || null,
+    name_kana: document.getElementById('f_name_kana').value || null,
+    gender: document.getElementById('f_gender').value || null,
+    phone: document.getElementById('f_phone').value || null,
+    email: document.getElementById('f_email').value || null,
+    line_id: document.getElementById('f_line_id').value || null,
+    postal_code: document.getElementById('f_postal_code').value || null,
+    prefecture: document.getElementById('f_prefecture').value || null,
+    city: document.getElementById('f_city').value || null,
+    address: document.getElementById('f_address').value || null,
+    building: document.getElementById('f_building').value || null,
+    company_name: document.getElementById('f_company_name').value || null,
+    company_phone: document.getElementById('f_company_phone').value || null,
+    company_prefecture: document.getElementById('f_company_prefecture').value || null,
+    company_city: document.getElementById('f_company_city').value || null,
+    company_building: document.getElementById('f_company_building').value || null,
+    mail_destination: document.getElementById('f_mail_destination').value || null,
+    joined_at: document.getElementById('f_joined_at').value || null,
+    left_at: document.getElementById('f_left_at').value || null,
+    no_mail: document.getElementById('f_no_mail').checked,
+    in_arrears: document.getElementById('f_in_arrears').checked,
+  };
+}
+
+async function saveRecord() {
+  const data = getFormData();
+  try {
+    if (isNew) {
+      const result = await api('POST', '/rest/v1/customers', data);
+      await loadAll();
+      currentIndex = records.findIndex(r => r.id === result[0].id);
+      isNew = false;
+      renderForm();
+      showToast('新規登録しました！', 'success');
+    } else {
+      const id = records[currentIndex].id;
+      await api('PATCH', '/rest/v1/customers?id=eq.' + id, data);
+      await loadAll();
+      currentIndex = records.findIndex(r => r.id === id);
+      renderForm();
+      showToast('保存しました！', 'success');
+    }
+  } catch(e) {
+    showToast('保存エラー: ' + e.message, 'error');
+  }
+}
+
+async function deleteRecord() {
+  if (!confirm('この会員を削除してもよいですか？')) return;
+  const id = records[currentIndex].id;
+  try {
+    await api('DELETE', '/rest/v1/customers?id=eq.' + id, null);
+    showToast('削除しました', 'success');
+    await loadAll();
+    currentIndex = Math.min(currentIndex, records.length - 1);
+    renderForm();
+  } catch(e) {
+    showToast('削除エラー: ' + e.message, 'error');
+  }
+}
+
+function newRecord() {
+  isNew = true;
+  renderForm({});
+  updateCounter();
+}
+
+function goFirst() { currentIndex = 0; isNew = false; renderForm(); }
+function goLast() { currentIndex = records.length - 1; isNew = false; renderForm(); }
+function goPrev() { if (currentIndex > 0) { currentIndex--; renderForm(); } }
+function goNext() { if (currentIndex < records.length - 1) { currentIndex++; renderForm(); } }
+
+function showEmpty() {
+  document.getElementById('main-content').innerHTML = '<div class="loading">データがありません。「＋ 新規」ボタンから登録してください。</div>';
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+
+function toKatakana(str) {
+  return str.replace(/[ぁ-ゖ]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+}
+
+function searchRecords(val) {
+  const results = document.getElementById('search-results');
+  if (!val.trim()) { results.style.display = 'none'; return; }
+  const valKata = toKatakana(val);
+  const matched = records.filter(r => 
+    (r.name && r.name.includes(val)) || 
+    (r.name_kana && (r.name_kana.includes(val) || r.name_kana.includes(valKata)))
+  );
+  if (matched.length === 0) {
+    results.innerHTML = '<div style="padding:12px;color:var(--gray);font-size:13px;">見つかりませんでした</div>';
+  } else {
+    results.innerHTML = matched.map(r => 
+      `<div onclick="selectRecord(${records.indexOf(r)})" 
+        style="padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border);"
+        onmouseover="this.style.background='var(--navy)'"
+        onmouseout="this.style.background=''">
+        ${r.name} <span style="color:var(--gray);font-size:12px;">${r.name_kana||''}</span>
+      </div>`
+    ).join('');
+  }
+  const input = document.getElementById('search-input');
+  const rect = input.getBoundingClientRect();
+  results.style.top = (rect.bottom + 4) + 'px';
+  results.style.left = rect.left + 'px';
+  results.style.width = '250px';
+  results.style.display = 'block';
+}
+
+function selectRecord(idx) {
+  currentIndex = idx;
+  isNew = false;
+  renderForm();
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('search-input').value = '';
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').style.display = 'none';
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#search-input') && !e.target.closest('#search-results')) {
+    document.getElementById('search-results').style.display = 'none';
+  }
+});
+
+// ===== アクション履歴 =====
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function catClass(cat) {
+  if (cat === '送付') return 'cat-send';
+  if (cat === '入出金') return 'cat-payment';
+  if (cat === '変更') return 'cat-change';
+  return '';
+}
+
+function formatAmount(amount) {
+  if (amount === null || amount === undefined || amount === '') return '—';
+  const n = Number(amount);
+  if (isNaN(n) || n === 0) return '—';
+  return (n > 0 ? '+' : '') + n.toLocaleString() + '円';
+}
+
+async function loadActions(memberId) {
+  const section = document.getElementById('actions-section');
+  if (!section) return;
+  section.innerHTML = '<div class="card"><div style="padding:16px;color:var(--gray);font-size:13px;">アクション履歴を読み込み中...</div></div>';
+  try {
+    const actions = await api('GET', '/rest/v1/actions?customer_id=eq.' + memberId + '&order=action_date.desc,id.desc', null);
+    renderActionSection(memberId, actions || []);
+  } catch(e) {
+    section.innerHTML = '<div class="card"><div style="color:var(--danger);font-size:13px;padding:16px;">アクション履歴の読み込みに失敗: ' + escHtml(e.message) + '</div></div>';
+  }
+}
+
+function renderActionSection(memberId, actions) {
+  const section = document.getElementById('actions-section');
+  if (!section) return;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const tableHtml = actions.length === 0
+    ? '<div style="text-align:center;color:var(--gray);padding:24px;font-size:13px;">アクション履歴はありません</div>'
+    : `<table class="action-table">
+        <thead><tr>
+          <th>日付</th><th>カテゴリ</th><th>サブカテゴリ</th><th style="text-align:right;">金額</th><th>メモ</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${actions.map(a => `
+            <tr>
+              <td>${escHtml(a.action_date||'—')}</td>
+              <td><span class="badge-cat ${catClass(a.category)}">${escHtml(a.category||'—')}</span></td>
+              <td>${escHtml(a.sub_category||'—')}</td>
+              <td style="text-align:right;">${formatAmount(a.amount)}</td>
+              <td>${escHtml(a.memo||'')}</td>
+              <td><button class="btn-del-action" onclick="deleteAction(${a.id}, ${memberId})" title="削除">🗑</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+
+  section.innerHTML = `
+    <div class="card">
+      <div class="actions-header">
+        <div class="card-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">アクション履歴</div>
+        <button class="btn-add-action" onclick="toggleActionForm()">＋ 追加</button>
+      </div>
+
+      <div id="action-form-box" class="action-form-box" style="display:none;">
+        <div class="form-grid three" style="gap:12px;margin-bottom:12px;">
+          <div class="field">
+            <label>カテゴリ</label>
+            <select id="af_category" class="action-input">
+              <option value="送付">送付</option>
+              <option value="入出金">入出金</option>
+              <option value="変更">変更</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>サブカテゴリ</label>
+            <select id="af_sub_category" class="action-input">
+              <option value="">— 選択 —</option>
+              <option value="議事録">議事録</option>
+              <option value="未納催促文">未納催促文</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>日付</label>
+            <input id="af_date" type="date" class="action-input" value="${today}">
+          </div>
+        </div>
+        <div class="form-grid" style="gap:12px;margin-bottom:12px;">
+          <div class="field">
+            <label>金額</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <select id="af_amount_sign" style="background:var(--navy);border:1px solid var(--border);color:var(--white);padding:8px 10px;border-radius:4px;font-size:14px;font-family:'Noto Sans JP',sans-serif;width:74px;">
+                <option value="+">＋</option>
+                <option value="-">－</option>
+              </select>
+              <input id="af_amount" type="number" min="0" placeholder="0" class="action-input" style="flex:1;">
+            </div>
+          </div>
+          <div class="field">
+            <label>メモ</label>
+            <input id="af_memo" type="text" class="action-input" placeholder="メモを入力...">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btn-outline" onclick="toggleActionForm()">キャンセル</button>
+          <button class="btn btn-primary" onclick="saveAction(${memberId})">保存</button>
+        </div>
+      </div>
+
+      ${tableHtml}
+    </div>
+  `;
+}
+
+function toggleActionForm() {
+  const box = document.getElementById('action-form-box');
+  if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+
+async function saveAction(memberId) {
+  const cat  = document.getElementById('af_category').value;
+  const sub  = document.getElementById('af_sub_category').value;
+  const date = document.getElementById('af_date').value;
+  const sign = document.getElementById('af_amount_sign').value;
+  const amtRaw = document.getElementById('af_amount').value;
+  const memo = document.getElementById('af_memo').value;
+
+  const amount = amtRaw !== '' ? (sign === '-' ? -Math.abs(Number(amtRaw)) : Math.abs(Number(amtRaw))) : null;
+
+  try {
+    await api('POST', '/rest/v1/actions', {
+      customer_id: memberId,
+      category: cat,
+      sub_category: sub || null,
+      action_date: date || null,
+      amount: amount,
+      memo: memo || null
+    });
+    showToast('アクションを追加しました', 'success');
+    loadActions(memberId);
+  } catch(e) {
+    showToast('保存エラー: ' + e.message, 'error');
+  }
+}
+
+async function deleteAction(actionId, memberId) {
+  if (!confirm('このアクションを削除しますか？')) return;
+  try {
+    await api('DELETE', '/rest/v1/actions?id=eq.' + actionId, null);
+    showToast('削除しました', 'success');
+    loadActions(memberId);
+  } catch(e) {
+    showToast('削除エラー: ' + e.message, 'error');
+  }
+}
+
+// URL ?id=X で指定レコード、?new=1 で新規入力画面
+async function loadAllThenJump() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('new') === '1') {
+    await loadAll();
+    newRecord();
+    return;
+  }
+  await loadAll();
+  const targetId = parseInt(params.get('id'));
+  if (targetId) {
+    const idx = records.findIndex(r => r.id === targetId);
+    if (idx >= 0) { currentIndex = idx; renderForm(); }
+  }
+}
+
+loadAllThenJump();
+
+</script>
+</body>
+</html>

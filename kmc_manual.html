@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMC 業務フローマニュアル</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(180deg,
+      #0a1628 0%,
+      #0d2b5e 20%,
+      #0e4a8a 45%,
+      #1a6fb5 65%,
+      #2899d4 82%,
+      #3dbce8 95%,
+      #5dd0f5 100%
+    );
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ===== 星 ===== */
+  .stars {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 35%;
+    pointer-events: none; z-index: 0;
+  }
+  .star {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+  @keyframes twinkle {
+    0%   { opacity: 0.2; transform: scale(1); }
+    100% { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* ===== 泡 ===== */
+  .bubbles {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+  .bubble {
+    position: absolute; bottom: -60px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), rgba(255,255,255,0.04));
+    border: 1px solid rgba(255,255,255,0.25);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+    50%  { transform: translateY(-40vh) translateX(18px) scale(1.1); opacity: 0.5; }
+    100% { transform: translateY(-95vh) translateX(-10px) scale(0.8); opacity: 0; }
+  }
+
+  /* ===== 波 ===== */
+  .wave-container {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; z-index: 1; pointer-events: none;
+  }
+  .wave { width: 200%; animation: waveMove 8s linear infinite; }
+  .wave2 { animation: waveMove 12s linear infinite reverse; opacity: 0.6; margin-top: -40px; }
+  .wave3 { animation: waveMove 6s linear infinite; opacity: 0.4; margin-top: -60px; }
+  @keyframes waveMove {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ===== ヘッダー ===== */
+  .header {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+  .header-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 24px;
+    padding: 24px 40px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .amado-img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(61,188,232,0.6));
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+  .header-text { text-align: left; }
+  .header-sub {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: #3dbce8;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .header-title {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, #a8e6f7 60%, #3dbce8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  /* ===== メインコンテンツ ===== */
+  .main {
+    position: relative; z-index: 10;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px 160px;
+  }
+
+  /* ===== セクション ===== */
+  .section {
+    margin-bottom: 28px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .section-header:hover { background: rgba(255,255,255,0.06); }
+
+  .section-num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 900;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  }
+  .num-1 { background: linear-gradient(135deg, #0066cc, #002288); }
+  .num-2 { background: linear-gradient(135deg, #0d7abf, #073d7a); }
+  .num-3 { background: linear-gradient(135deg, #0e7c6b, #063d36); }
+  .num-doc { background: linear-gradient(135deg, #7b2d8b, #4a1060); }
+
+  .section-title {
+    flex: 1;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .chevron {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    transition: transform 0.3s;
+  }
+  .section.open .chevron { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    padding: 0 24px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .section.open .section-body { display: block; }
+
+  /* ===== ステップカード ===== */
+  .step-list { display: flex; flex-direction: column; gap: 12px; padding-top: 18px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 14px 18px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .step:hover { background: rgba(255,255,255,0.1); transform: translateX(4px); }
+
+  .step-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+  .step-content { flex: 1; }
+  .step-label {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
+    color: #3dbce8; margin-bottom: 4px;
+  }
+  .step-desc { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+
+  /* ===== テーブル ===== */
+  .check-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  .check-table th {
+    background: rgba(61,188,232,0.25);
+    color: #a8e6f7;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .check-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.85);
+    vertical-align: top;
+  }
+  .check-table tr:hover td { background: rgba(255,255,255,0.05); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-join  { background: rgba(0,200,100,0.25); color: #5efa9e; border: 1px solid rgba(0,200,100,0.3); }
+  .badge-leave { background: rgba(255,80,80,0.25);  color: #ff9999; border: 1px solid rgba(255,80,80,0.3); }
+  .badge-change { background: rgba(255,180,0,0.25); color: #ffd966; border: 1px solid rgba(255,180,0,0.3); }
+
+  /* ===== タグ ===== */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .tag {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.9);
+  }
+  .tag-cyan  { background: rgba(61,188,232,0.2); border-color: rgba(61,188,232,0.4); color: #a8e6f7; }
+  .tag-green { background: rgba(0,200,100,0.2);  border-color: rgba(0,200,100,0.4);  color: #5efa9e; }
+  .tag-amber { background: rgba(255,180,0,0.2);  border-color: rgba(255,180,0,0.4);  color: #ffd966; }
+
+  /* ===== テンプレートカード ===== */
+  .template-card {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-top: 14px;
+  }
+  .template-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    color: #3dbce8; margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .template-body {
+    font-size: 13px;
+    line-height: 2;
+    color: rgba(255,255,255,0.85);
+    white-space: pre-line;
+  }
+  .template-placeholder {
+    color: #ffd966;
+    font-weight: 700;
+  }
+
+  /* ===== コピーボタン ===== */
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px;
+    padding: 7px 16px;
+    background: rgba(61,188,232,0.2);
+    border: 1px solid rgba(61,188,232,0.4);
+    border-radius: 20px;
+    color: #a8e6f7;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: rgba(61,188,232,0.35); transform: scale(1.03); }
+
+  /* ===== マスコット（下部） ===== */
+  .mascot-area {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 10px 0 20px;
+  }
+  .mascot-bubble {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 16px 28px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .mascot-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(255,255,255,0.2);
+  }
+  .mascot-img-bottom {
+    width: 70px;
+    filter: drop-shadow(0 4px 10px rgba(61,188,232,0.5));
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* ===== 戻るボタン ===== */
+  .back-btn {
+    position: fixed;
+    top: 20px; left: 20px;
+    z-index: 100;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 30px;
+    color: #fff;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .back-btn:hover {
+    background: rgba(255,255,255,0.22);
+    transform: translateX(-3px);
+  }
+</style>
+</head>
+<body>
+
+<!-- 戻るボタン -->
+<a class="back-btn" href="kmc_login.html">&#8592; ログインへ戻る</a>
+
+<!-- 星 -->
+<div class="stars" id="stars"></div>
+
+<!-- 泡 -->
+<div class="bubbles" id="bubbles"></div>
+
+<!-- 波 -->
+<div class="wave-container">
+  <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="rgba(255,255,255,0.06)"/>
+  </svg>
+  <svg class="wave wave2" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,40 C360,0 1080,80 1440,40 L1440,80 L0,80 Z" fill="rgba(255,255,255,0.04)"/>
+  </svg>
+  <svg class="wave wave3" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,50 C480,10 960,70 1440,30 L1440,80 L0,80 Z" fill="rgba(255,255,255,0.03)"/>
+  </svg>
+</div>
+
+<!-- ヘッダー -->
+<div class="header">
+  <div class="header-inner">
+    <img class="amado-img" src="KMCjimu.png" alt="アマドちゃん">
+    <div class="header-text">
+      <div class="header-sub">KMC Kanagawa Marine Club</div>
+      <div class="header-title">業務フロー<br>マニュアル</div>
+    </div>
+  </div>
+</div>
+
+<!-- メイン -->
+<div class="main">
+
+  <!-- ① 入会・退会・変更チェック -->
+  <div class="section open" id="sec1">
+    <div class="section-header" onclick="toggle('sec1')">
+      <div class="section-num num-1">1</div>
+      <div class="section-title">入会・退会・変更チェック</div>
+      <div class="chevron">&#9660;</div>
+    </div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-icon">📥</div>
+          <div class="step-content">
+            <div class="step-label">STEP 1 — 申請書を受け取る</div>
+            <div class="step-desc">入会・退会・変更の申請書（紙 or メール添付）を受領し、受付日を記録する。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">🔍</div>
+          <div class="step-content">
+            <div class="step-label">STEP 2 — 種別を確認する</div>
+            <div class="step-desc">申請種別を確認し、下表のチェック項目を漏れなく確認する。</div>
+          </div>
+        </div>
+      </div>
+
+      <table class="check-table">
+        <thead>
+          <tr>
+            <th>種別</th>
+            <th>確認項目</th>
+            <th>必要書類</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-join">入会</span></td>
+            <td>氏名・住所・連絡先・緊急連絡先・船舶免許の有無</td>
+            <td>入会申込書・振込確認</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-leave">退会</span></td>
+            <td>退会希望月・未払い年会費の有無・備品返却</td>
+            <td>退会届・備品返却確認書</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-change">変更</span></td>
+            <td>変更内容（住所/連絡先/メール等）・本人確認</td>
+            <td>変更届</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="step-list" style="padding-top:14px;">
+        <div class="step">
+          <div class="step-icon">💾</div>
+          <div class="step-content">
+            <div class="step-label">STEP 3 — システムに反映する</div>
+            <div class="step-desc">KMC会員管理システム（本ページ）の該当レコードを更新する。入会は新規追加、退会はステータスを「退会」に変更、変更は該当フィールドを修正する。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">✅</div>
+          <div class="step-content">
+            <div class="step-label">STEP 4 — 完了通知を送る</div>
+            <div class="step-desc">申請者に処理完了のメールを送付する。入会の場合は会員番号と年会費の振込先を同封する。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 表フォームで会費催促者チェック -->
+  <div class="section open" id="sec2">
+    <div class="section-header" onclick="toggle('sec2')">
+      <div class="section-num num-2">2</div>
+      <div class="section-title">表フォームで会費催促者チェック</div>
+      <div class="chevron">&#9660;</div>
+    </div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-icon">📋</div>
+          <div class="step-content">
+            <div class="step-label">STEP 1 — 表形式でログインする</div>
+            <div class="step-desc">ログイン画面の「表形式で入る」ボタンからシステムに入り、会員一覧を表示する。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">🔎</div>
+          <div class="step-content">
+            <div class="step-label">STEP 2 — 未納者を絞り込む</div>
+            <div class="step-desc">「年会費状況」列でフィルタリングし、<strong style="color:#ff9999;">未納・一部納入</strong>の会員を抽出する。催促対象月（通常は前年度末）を基準に確認する。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">📊</div>
+          <div class="step-content">
+            <div class="step-label">STEP 3 — 催促者リストを作成する</div>
+            <div class="step-desc">抽出した会員の氏名・会員番号・未納額・連絡先をリストアップし、催促作業に使用する。</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; padding:14px 16px; background:rgba(255,180,0,0.1); border:1px solid rgba(255,180,0,0.3); border-radius:12px;">
+        <div style="font-size:12px; font-weight:700; color:#ffd966; margin-bottom:6px;">&#9888; チェックポイント</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.8); line-height:1.7;">
+          年会費の締め日は <strong style="color:#ffd966;">毎年3月31日</strong> です。<br>
+          4月以降も未納の場合は催促ラベルの出力対象とします。<br>
+          長期未納（2年以上）の方は別途役員会へ報告してください。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ ラベル出力 -->
+  <div class="section open" id="sec3">
+    <div class="section-header" onclick="toggle('sec3')">
+      <div class="section-num num-3">3</div>
+      <div class="section-title">催促者以外ラベル＋催促者ラベル出力</div>
+      <div class="chevron">&#9660;</div>
+    </div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-icon">🏷️</div>
+          <div class="step-content">
+            <div class="step-label">通常ラベル（催促者以外）</div>
+            <div class="step-desc">会費納入済みの全会員を対象に宛名ラベルを出力する。印刷用紙：A4ラベル用紙（21面）。出力元：会員管理システムのラベル出力機能を使用。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">&#128276;</div>
+          <div class="step-content">
+            <div class="step-label">催促者ラベル</div>
+            <div class="step-desc">②で抽出した未納会員のみを対象にラベルを出力する。催促文と同封して郵送する。ラベル用紙の色を変えると区別しやすい（例：黄色ラベル）。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">📬</div>
+          <div class="step-content">
+            <div class="step-label">郵送準備・発送</div>
+            <div class="step-desc">通常会員：会報誌・議事録を封入してラベルを貼付。催促会員：催促文・振込用紙を加えて封入。まとめて郵便局へ持参する。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tag-list">
+        <span class="tag tag-cyan">A4ラベル 21面</span>
+        <span class="tag tag-green">納入済み → 通常ラベル</span>
+        <span class="tag tag-amber">未納 → 催促ラベル（黄色）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 議事録＋年会費催促文テンプレート -->
+  <div class="section open" id="sec4">
+    <div class="section-header" onclick="toggle('sec4')">
+      <div class="section-num num-doc">&#128196;</div>
+      <div class="section-title">議事録＋年会費催促文テンプレート</div>
+      <div class="chevron">&#9660;</div>
+    </div>
+    <div class="section-body">
+
+      <!-- 議事録テンプレート -->
+      <div class="template-card">
+        <div class="template-title">&#128221; 議事録テンプレート</div>
+        <div class="template-body" id="tmpl-minutes">神奈川マリンクラブ（KMC）
+第<span class="template-placeholder">[回数]</span>回 定例役員会 議事録
+
+日　時：<span class="template-placeholder">[年月日]</span>　<span class="template-placeholder">[開始時刻]</span>〜<span class="template-placeholder">[終了時刻]</span>
+場　所：<span class="template-placeholder">[会場名]</span>
+出席者：<span class="template-placeholder">[氏名, 氏名, ...]</span>
+欠席者：<span class="template-placeholder">[氏名]</span>（委任状あり）
+記　録：<span class="template-placeholder">[記録者氏名]</span>
+
+─────────────────────────────
+１．前回議事録の確認
+　→ 全員承認
+
+２．報告事項
+　・会員数報告：正会員 <span class="template-placeholder">[○]</span>名、準会員 <span class="template-placeholder">[○]</span>名
+　・入退会報告：入会 <span class="template-placeholder">[○]</span>名、退会 <span class="template-placeholder">[○]</span>名
+　・年会費納入状況：納入済 <span class="template-placeholder">[○]</span>名、未納 <span class="template-placeholder">[○]</span>名
+
+３．審議事項
+　（１）<span class="template-placeholder">[議題]</span>
+　　　議論内容：<span class="template-placeholder">[内容]</span>
+　　　決　議：<span class="template-placeholder">[可決・否決・継続審議]</span>
+
+４．その他
+　・次回開催予定：<span class="template-placeholder">[年月日]</span>　<span class="template-placeholder">[会場]</span>
+
+以上
+─────────────────────────────</div>
+        <button class="copy-btn" onclick="copyText('tmpl-minutes', this)">&#128203; テキストをコピー</button>
+      </div>
+
+      <!-- 催促文テンプレート -->
+      <div class="template-card" style="margin-top:20px;">
+        <div class="template-title">&#128276; 年会費催促文テンプレート</div>
+        <div class="template-body" id="tmpl-demand"><span class="template-placeholder">[年月日]</span>
+
+<span class="template-placeholder">[会員氏名]</span> 様
+
+　　　　　神奈川マリンクラブ（KMC）
+
+　　　　年会費ご納入のお願い
+
+拝啓　時下ますますご清栄のこととお慶び申し上げます。
+平素より当クラブの活動にご支援・ご参加いただき、誠にありがとうございます。
+
+さて、<span class="template-placeholder">[年度（例：2025年度）]</span> の年会費について、現在のところご入金が確認できておりません。
+お忙しいところ誠に恐れ入りますが、下記口座へのお振込をお願い申し上げます。
+
+─────────────────────────────
+　年　会　費：<span class="template-placeholder">[金額]</span> 円
+　お振込期限：<span class="template-placeholder">[期限日]</span>
+　振 込 先 ：<span class="template-placeholder">[銀行名]</span>　<span class="template-placeholder">[支店名]</span>
+　　　　　　　口座種別：<span class="template-placeholder">[普通/当座]</span>　口座番号：<span class="template-placeholder">[口座番号]</span>
+　　　　　　　口座名義：<span class="template-placeholder">[名義]</span>
+─────────────────────────────
+
+なお、本状と行き違いにお振込いただいた場合はご容赦ください。
+ご不明な点がございましたら、下記までご連絡ください。
+
+　KMC 事務局　担当：<span class="template-placeholder">[担当者名]</span>
+　TEL：<span class="template-placeholder">[電話番号]</span>　EMAIL：<span class="template-placeholder">[メールアドレス]</span>
+
+　　　　　　　　　　　　　　　　　　　　　　敬具</div>
+        <button class="copy-btn" onclick="copyText('tmpl-demand', this)">&#128203; テキストをコピー</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- マスコット -->
+  <div class="mascot-area">
+    <div class="mascot-bubble">マニュアルを参考にして、今日も業務をがんばってね！🐾</div><br>
+    <img class="mascot-img-bottom" src="KMCjimu.png" alt="アマドちゃん">
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  // 星
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
+    starsEl.appendChild(s);
+  }
+
+  // 泡
+  const bubblesEl = document.getElementById('bubbles');
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 30 + 10;
+    b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${5+Math.random()*8}s;animation-delay:${Math.random()*6}s;`;
+    bubblesEl.appendChild(b);
+  }
+
+  // アコーディオン
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  // テキストコピー
+  function copyText(id, btn) {
+    const el = document.getElementById(id);
+    const text = el.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅ コピーしました！';
+      setTimeout(() => { btn.innerHTML = '&#128203; テキストをコピー'; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = '✅ コピーしました！';
+      setTimeout(() => { btn.innerHTML = '&#128203; テキストをコピー'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
