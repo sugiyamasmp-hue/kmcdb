@@ -669,17 +669,17 @@ function printLabels() {
     '@media print{.info-bar{display:none}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
     '</style></head><body>' +
     '<div class="info-bar">' +
-    '<strong>議事録のみ: ' + gijirokuOnly.length + '名</strong> ／ ' +
-    '<strong>催促あり: ' + sasoku.length + '名</strong> ／ 計 ' + mailing.length + '名' +
+    '<strong>催促あり: ' + sasoku.length + '名</strong> ／ ' +
+    '<strong>議事録のみ: ' + gijirokuOnly.length + '名</strong> ／ 計 ' + mailing.length + '名' +
     '&nbsp;&nbsp;<button onclick="window.print()">🖨 印刷</button>' +
     '<button onclick="window.close()" style="margin-left:4px;">✕ 閉じる</button>' +
     '</div>' +
     '<div class="page">' +
-    '<div class="sec-head">■ 議事録のみ（' + gijirokuOnly.length + '名）</div>' +
-    gijirokuOnly.map(labelHtml).join('') +
-    '<hr class="divider">' +
     '<div class="sec-head">■ 未納催促あり（' + sasoku.length + '名）</div>' +
     sasoku.map(labelHtml).join('') +
+    '<hr class="divider">' +
+    '<div class="sec-head">■ 議事録のみ（' + gijirokuOnly.length + '名）</div>' +
+    gijirokuOnly.map(labelHtml).join('') +
     '</div></body></html>';
 
   const win = window.open('', '_blank', 'width=900,height=700');
