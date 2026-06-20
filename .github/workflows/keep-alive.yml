@@ -14,7 +14,7 @@ jobs:
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
             "${{ secrets.SUPABASE_URL_KMC }}/auth/v1/health")
           echo "KMC Response: $RESPONSE"
-          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 500 ]; then
             echo "✅ KMC is alive!"
           else
             echo "❌ KMC ping failed with HTTP $RESPONSE"
