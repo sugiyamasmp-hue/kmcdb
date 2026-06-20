@@ -15,4 +15,3 @@ jobs:
             "${{ secrets.SUPABASE_URL_KMC }}/rest/v1/?apikey=${{ secrets.SUPABASE_ANON_KEY_KMC }}")
           echo "KMC Response: $RESPONSE"
           [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ] && echo "✅ KMC is alive!" || exit 1
-、
