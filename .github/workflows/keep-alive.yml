@@ -12,6 +12,13 @@ jobs:
       - name: Ping KMC
         run: |
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL_KMC }}/rest/v1/?apikey=${{ secrets.SUPABASE_ANON_KEY_KMC }}")
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY_KMC }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY_KMC }}" \
+            "${{ secrets.SUPABASE_URL_KMC }}/rest/v1/")
           echo "KMC Response: $RESPONSE"
-          [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ] && echo "✅ KMC is alive!" || exit 1
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+            echo "✅ KMC is alive!"
+          else
+            echo "❌ KMC ping failed with HTTP $RESPONSE"
+            exit 1
+          fi
