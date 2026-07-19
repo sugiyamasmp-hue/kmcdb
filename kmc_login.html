@@ -535,6 +535,7 @@
 
 </div>
 
+<script src="config.js"></script>
 <script>
   // 星を生成
   const starsEl = document.getElementById('stars');
@@ -562,7 +563,12 @@
   function login(mode) {
     const pw = document.getElementById('password').value;
     if (!pw) { shake(); return; }
-    if (pw !== 'kmc2024') {
+    const VIEW_PASSWORD = window.KMC_AUTH_CONFIG.VIEW_PASSWORD;
+    const EDIT_PASSWORD = window.KMC_AUTH_CONFIG.EDIT_PASSWORD;
+    let role = null;
+    if (pw === EDIT_PASSWORD) role = 'editor';
+    else if (pw === VIEW_PASSWORD) role = 'viewer';
+    if (!role) {
       document.getElementById('password').value = '';
       document.getElementById('password').placeholder = 'パスワードが違います';
       shake();
@@ -571,6 +577,7 @@
       }, 2000);
       return;
     }
+    localStorage.setItem('kmc_role', role);
     if (mode === 'table') {
       window.location.href = 'kmc_list.html';
     } else {

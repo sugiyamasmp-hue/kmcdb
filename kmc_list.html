@@ -292,6 +292,7 @@
     .toolbar { padding: 10px 12px; }
     header { padding: 10px 12px; }
   }
+  body.viewer-mode .editor-only { display: none !important; }
 </style>
 </head>
 <body>
@@ -317,7 +318,7 @@
     </div>
     <div class="header-title">会員一覧</div>
     <div class="header-actions">
-      <button class="hbtn hbtn-primary" onclick="newMember()">＋ 新規登録</button>
+      <button class="hbtn hbtn-primary editor-only" onclick="newMember()">＋ 新規登録</button>
       <button class="hbtn hbtn-close" onclick="location.href='kmc_login.html'">✕ 閉じる</button>
     </div>
   </header>
@@ -328,8 +329,8 @@
       <span class="search-icon">🔍</span>
       <input class="search-input" id="searchInput" type="text" placeholder="氏名・シメイ・船名・センメイで検索..." oninput="applyFilter()">
     </div>
-    <button class="hbtn hbtn-gijiroku" onclick="bulkGijiroku()">📨 議事録一括送付</button>
-    <button class="hbtn hbtn-sasoku"   onclick="bulkSasoku()">⚠️ 催促一括送付</button>
+    <button class="hbtn hbtn-gijiroku editor-only" onclick="bulkGijiroku()">📨 議事録一括送付</button>
+    <button class="hbtn hbtn-sasoku editor-only"   onclick="bulkSasoku()">⚠️ 催促一括送付</button>
     <button class="hbtn hbtn-label"    onclick="printLabels()">🖨 ラベルPDF出力</button>
     <div class="toolbar-count" id="countEl"><strong>—</strong> 件</div>
   </div>
@@ -361,6 +362,10 @@
 <script>
 const SUPABASE_URL = 'https://wxuqqkpgyfkpuejvvzix.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_8NnuA53dbxq_sK-yovy-wA_ZDvu2AHO';
+
+// ===== 権限 (role) =====
+const kmcRole = localStorage.getItem('kmc_role');
+if (kmcRole !== 'editor') { document.body.classList.add('viewer-mode'); }
 
 let allRecords = [];
 let filteredRecords = [];
@@ -487,7 +492,7 @@ function renderTable() {
       <td>${esc(r.boat_name||'—')}</td>
       <td class="kana">${esc(r.boat_name_kana||'—')}</td>
       <td onclick="event.stopPropagation()" style="white-space:nowrap;">
-        <div style="display:flex;align-items:center;gap:5px;">
+        <div class="editor-only" style="display:flex;align-items:center;gap:5px;">
           <select class="action-select" id="cat_${r.id}" onchange="onActionChange(this, ${r.id})">
             <option value="">— 選択 —</option>
             <option value="送付">送付</option>
@@ -533,6 +538,7 @@ function onActionChange(sel, id) {
 }
 
 async function saveRowAction(id) {
+  if (localStorage.getItem('kmc_role') !== 'editor') { showToast('編集権限がありません', 'error'); return; }
   const catEl = document.getElementById('cat_' + id);
   const subEl = document.getElementById('sub_' + id);
   const cat = catEl ? catEl.value : '';
@@ -598,6 +604,7 @@ async function apiPost(path, body) {
 
 // ===== 議事録一括送付 =====
 async function bulkGijiroku() {
+  if (localStorage.getItem('kmc_role') !== 'editor') { showToast('編集権限がありません', 'error'); return; }
   if (!allRecords.length) { showToast('先にデータを読み込んでください', 'error'); return; }
   const targets = allRecords.filter(r => !r.no_mail);
   if (!confirm('全会員（' + targets.length + '名）に議事録送付を記録しますか？')) return;
@@ -617,6 +624,7 @@ async function bulkGijiroku() {
 
 // ===== 催促一括送付 =====
 async function bulkSasoku() {
+  if (localStorage.getItem('kmc_role') !== 'editor') { showToast('編集権限がありません', 'error'); return; }
   const targets = allRecords.filter(r => r.in_arrears && !r.no_mail);
   if (!targets.length) { showToast('滞納中（郵送対象）の会員はいません', 'error'); return; }
   if (!confirm('滞納中の ' + targets.length + ' 名に催促送付を記録しますか？')) return;
