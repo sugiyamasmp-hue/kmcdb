@@ -1,0 +1,40 @@
+name: Supabase Restart
+
+# 手動実行専用。Actions タブ → Supabase Restart → Run workflow で実行する。
+#
+# 必要な Secrets:
+#   SUPABASE_ACCESS_TOKEN … https://supabase.com/dashboard/account/tokens で発行
+# 任意の Secrets / Variables:
+#   SUPABASE_PROJECT_REF  … 未設定なら下の既定値を使用
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '実行する操作'
+        type: choice
+        required: true
+        default: restart
+        options:
+          - status
+          - restart
+          - restore
+      project_ref:
+        description: 'プロジェクト ref（空なら Secret / 既定値）'
+        type: string
+        required: false
+        default: ''
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Supabase ${{ inputs.action }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ inputs.project_ref || secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          chmod +x scripts/supabase-restart.sh
+          ./scripts/supabase-restart.sh "--${{ inputs.action }}"
