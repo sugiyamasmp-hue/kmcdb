@@ -310,6 +310,16 @@
 
 <div id="actions-section" class="main" style="padding-top:0;"></div>
 
+<!-- 下部ナビゲーションバー -->
+<div class="nav-bar" style="position:sticky;bottom:0;z-index:50;">
+  <button class="nav-btn" onclick="goFirst()">|◀</button>
+  <button class="nav-btn" onclick="goPrev()">◀ 前へ</button>
+  <button class="nav-btn" onclick="goNext()">次へ ▶</button>
+  <button class="nav-btn" onclick="goLast()">▶|</button>
+  <button class="nav-btn" onclick="saveRecord()" style="border-color:var(--accent);color:var(--accent);">💾 保存</button>
+  <div class="counter" style="margin-left:auto;" id="counter-bottom"><span>読込中...</span></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -361,11 +371,12 @@ async function loadAll() {
 
 function updateCounter() {
   const el = document.getElementById('counter');
-  if (isNew) {
-    el.innerHTML = '<span>新規入力中</span>';
-  } else {
-    el.innerHTML = (currentIndex + 1) + ' <span>/ ' + records.length + ' 件</span>';
-  }
+  const elBottom = document.getElementById('counter-bottom');
+  const html = isNew
+    ? '<span>新規入力中</span>'
+    : (currentIndex + 1) + ' <span>/ ' + records.length + ' 件</span>';
+  el.innerHTML = html;
+  if (elBottom) elBottom.innerHTML = html;
   document.getElementById('btn-prev').disabled = currentIndex <= 0 || isNew;
   document.getElementById('btn-next').disabled = currentIndex >= records.length - 1 || isNew;
   document.getElementById('btn-first').disabled = currentIndex <= 0 || isNew;

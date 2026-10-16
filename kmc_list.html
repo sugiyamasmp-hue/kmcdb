@@ -371,6 +371,7 @@ let allRecords = [];
 let filteredRecords = [];
 let sortKey = 'id';
 let sortAsc = true;
+let arrearsIds = new Set();
 
 // ===== 背景生成 =====
 (function initBg() {
@@ -410,9 +411,10 @@ async function api(path) {
 // ===== データ読込 =====
 async function loadAll() {
   try {
-    const [customers, boats] = await Promise.all([
+    const [customers, boats, arrearsActions] = await Promise.all([
       api('/rest/v1/customers?select=*&order=id.asc'),
-      api('/rest/v1/boats?select=customer_id,boat_name,boat_name_kana')
+      api('/rest/v1/boats?select=customer_id,boat_name,boat_name_kana'),
+      api('/rest/v1/actions?select=customer_id&sub_category=eq.' + encodeURIComponent('未納催促文'))
     ]);
     const boatMap = {};
     boats.forEach(b => { boatMap[b.customer_id] = b; });
@@ -423,6 +425,7 @@ async function loadAll() {
         boat_name_kana: b.boat_name_kana || null
       });
     });
+    arrearsIds = new Set(arrearsActions.map(a => a.customer_id));
     applyFilter();
   } catch(e) {
     showToast('読込エラー: ' + e.message, 'error');
@@ -602,6 +605,21 @@ async function apiPost(path, body) {
   if (!res.ok) throw new Error(await res.text());
 }
 
+// ===== Supabase PATCH =====
+async function apiPatch(path, body) {
+  const res = await fetch(SUPABASE_URL + path, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
 // ===== 議事録一括送付 =====
 async function bulkGijiroku() {
   if (localStorage.getItem('kmc_role') !== 'editor') { showToast('編集権限がありません', 'error'); return; }
@@ -643,10 +661,11 @@ async function bulkSasoku() {
 }
 
 // ===== ラベルPDF出力 =====
-function printLabels() {
-  const mailing = allRecords.filter(r => !r.no_mail);
-  const gijirokuOnly = mailing.filter(r => !r.in_arrears);
-  const sasoku       = mailing.filter(r =>  r.in_arrears);
+async function printLabels() {
+  const mailing      = allRecords.filter(r => !r.no_mail);
+  const sasoku       = mailing.filter(r =>  arrearsIds.has(r.id));
+  const gijirokuOnly = mailing.filter(r => !arrearsIds.has(r.id));
+
 
   function e(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -690,10 +709,21 @@ function printLabels() {
     gijirokuOnly.map(labelHtml).join('') +
     '</div></body></html>';
 
+  // window.openはawaitより前に呼ぶ（ポップアップブロッカー対策）
   const win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { showToast('ポップアップがブロックされました。許可してください', 'error'); return; }
   win.document.write(html);
   win.document.close();
+
+  // in_arrears=trueの会員を全員falseにリセット（編集権限のみ）
+  if (localStorage.getItem('kmc_role') !== 'editor') return;
+  try {
+    await apiPatch('/rest/v1/customers?in_arrears=eq.true', { in_arrears: false });
+    allRecords.forEach(r => { r.in_arrears = false; });
+    showToast('催促ラベルを出力しました。滞納フラグをリセットしました。', 'success');
+  } catch(e) {
+    showToast('出力完了。リセットエラー: ' + e.message, 'error');
+  }
 }
 
 loadAll();
